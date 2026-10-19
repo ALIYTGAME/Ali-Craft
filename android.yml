@@ -1,0 +1,29 @@
+
+name: Android build
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Распаковать проект, если в репозитории лежит только ZIP
+        run: |
+          if [ ! -f settings.gradle.kts ] && [ -f AliCraft-Launcher-source.zip ]; then
+            unzip -oq AliCraft-Launcher-source.zip -d .
+          fi
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.7' }
+      - name: Тесты, lint, сборка
+        run: gradle --no-daemon testDebugUnitTest lintDebug assembleDebug
+      - run: ls -l app/build/outputs/apk/debug/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AliCraft-Launcher-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          
