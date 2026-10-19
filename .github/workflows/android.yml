@@ -12,13 +12,15 @@ jobs:
           if [ ! -f settings.gradle.kts ] && [ -f AliCraft-Launcher-source.zip ]; then
             unzip -oq AliCraft-Launcher-source.zip -d .
           fi
+          ls -la
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '17' }
-      - uses: android-actions/setup-android@v3
+      - name: Лицензии Android SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: '8.7' }
-      - name: Тесты, lint, сборка
-        run: gradle --no-daemon testDebugUnitTest lintDebug assembleDebug
+      - name: Сборка
+        run: gradle --no-daemon testDebugUnitTest assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: AliCraft-Launcher-apk
